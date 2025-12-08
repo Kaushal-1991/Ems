@@ -3,8 +3,12 @@ package com.ems.serviceImpl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.ModelMap;
 
 import com.ems.dto.EmployeeDto;
 import com.ems.entity.Employee;
@@ -18,6 +22,9 @@ public class EmployeeServiceImpl implements EmployeeService{
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
+	
+	@Autowired
+	public ModelMapper modelMapper;
 
 	@Override
 	public EmployeeDto createEmployee(EmployeeDto dto) {
@@ -58,5 +65,11 @@ public class EmployeeServiceImpl implements EmployeeService{
                 .orElseThrow(() -> new ResourceNotFoundException("Employee id is not exists : " + empId));
 		
 		employeeRepository.delete(emp);
+	}
+
+	@Override
+	public Page<EmployeeDto> getEmployeeWithPagination(Pageable pageable) {
+		Page<Employee> pageData = employeeRepository.findAll(pageable);
+		return pageData.map(emp -> modelMapper.map(emp, EmployeeDto.class));
 	}
 }
